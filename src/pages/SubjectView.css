@@ -1,0 +1,257 @@
+/* Subject View Page Styles */
+
+.subject-view-page {
+    animation: fadeIn var(--transition-base) ease-out;
+}
+
+.back-button {
+    margin-bottom: var(--space-lg);
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.subject-header h1 {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+}
+
+.stat-card {
+    text-align: center;
+    padding: var(--space-xl);
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Section */
+.section {
+    margin-bottom: var(--space-3xl);
+}
+
+.section h2 {
+    margin-bottom: var(--space-lg);
+}
+
+/* Exams List */
+.exams-list {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.exam-item {
+    padding: var(--space-lg);
+}
+
+.clickable-card {
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.clickable-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-lg);
+}
+
+.exam-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.exam-date {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.exam-status {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.exam-status.status-active {
+    background: var(--color-info);
+    color: white;
+}
+
+.exam-status.status-completed {
+    background: var(--color-warning);
+    color: white;
+}
+
+.exam-status.status-reviewed {
+    background: var(--color-success);
+    color: white;
+}
+
+.exam-stats-row {
+    display: flex;
+    gap: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.exam-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.stat-icon {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.exam-results {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.result-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.result-badge.correct {
+    background: rgba(56, 178, 172, 0.1);
+    color: var(--color-success);
+}
+
+.result-badge.incorrect {
+    background: rgba(245, 101, 101, 0.1);
+    color: var(--color-error);
+}
+
+.result-badge.missed {
+    background: rgba(237, 137, 54, 0.1);
+    color: var(--color-warning);
+}
+
+/* Notes List */
+.notes-list {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.note-item {
+    padding: var(--space-lg);
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.note-question {
+    display: inline-block;
+    padding: var(--space-xs) var(--space-md);
+    background: var(--color-primary);
+    color: white;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+.note-date {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+}
+
+.note-content {
+    padding: var(--space-md);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    line-height: 1.6;
+    margin-bottom: var(--space-md);
+    white-space: pre-wrap;
+}
+
+.note-status {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.note-status.status-correct {
+    color: var(--color-success);
+}
+
+.note-status.status-incorrect {
+    color: var(--color-error);
+}
+
+.note-status.status-unattempted {
+    color: var(--color-warning);
+}
+
+.empty-message {
+    text-align: center;
+    padding: var(--space-3xl);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .subject-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

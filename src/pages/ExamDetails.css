@@ -1,0 +1,117 @@
+.exam-details-page {
+    padding: var(--space-xl);
+    max-width: 1000px;
+    margin: 0 auto;
+    animation: fadeIn var(--transition-normal) ease-out;
+}
+
+.details-header {
+    margin-bottom: var(--space-xl);
+}
+
+.details-header h1 {
+    margin: 0 0 var(--space-xs) 0;
+    font-size: var(--font-size-2xl);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.exam-meta {
+    display: flex;
+    gap: var(--space-lg);
+    color: var(--color-text-light);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-sm);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.details-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-xl);
+}
+
+.details-stat-card {
+    text-align: center;
+    padding: var(--space-lg);
+}
+
+.questions-table-container {
+    overflow-x: auto;
+}
+
+.questions-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--color-text);
+}
+
+.questions-table th {
+    text-align: left;
+    padding: var(--space-md);
+    border-bottom: 2px solid var(--color-border);
+    font-weight: 600;
+    color: var(--color-text-light);
+}
+
+.questions-table td {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.questions-table tr:last-child td {
+    border-bottom: none;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.status-badge.correct {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--color-success);
+}
+
+.status-badge.incorrect {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+}
+
+.status-badge.missed {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--color-text-light);
+}
+
+.note-preview {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+    .exam-details-page {
+        padding: var(--space-md);
+    }
+
+    .exam-meta {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+}

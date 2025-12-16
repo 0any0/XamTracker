@@ -1,0 +1,14 @@
+/* Subject Comparison Chart Styles */
+
+.tooltip-subject {
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: var(--space-sm);
+    font-size: var(--font-size-base);
+}
+
+.tooltip-stat {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-xs);
+}

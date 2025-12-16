@@ -1,0 +1,51 @@
+/* Chart Components Styles */
+
+.chart-card {
+    padding: var(--space-xl);
+    margin-bottom: var(--space-xl);
+}
+
+.chart-title {
+    margin-bottom: var(--space-xs);
+    color: var(--color-text);
+    font-size: var(--font-size-xl);
+}
+
+.chart-description {
+    margin-bottom: var(--space-lg);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.custom-tooltip {
+    background: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-lg);
+}
+
+.tooltip-date {
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-xs);
+}
+
+.tooltip-accuracy,
+.tooltip-questions {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-xs);
+}
+
+.tooltip-accuracy {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chart-card {
+        padding: var(--space-md);
+    }
+}

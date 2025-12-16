@@ -1,0 +1,61 @@
+/* Timer Component Styles */
+
+.timer {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+    font-weight: 600;
+    color: var(--color-primary);
+    background: var(--color-surface);
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--color-primary);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.timer-icon {
+    width: 1.2em;
+    height: 1.2em;
+    animation: tick 1s steps(12) infinite;
+}
+
+@keyframes tick {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.timer-display {
+    font-size: 1em;
+    letter-spacing: 0.05em;
+}
+
+/* Size variants */
+.timer-small {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-sm);
+}
+
+.timer-medium {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-lg);
+}
+
+.timer-large {
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--font-size-3xl);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .timer-large {
+        font-size: var(--font-size-2xl);
+        padding: var(--space-sm) var(--space-lg);
+    }
+}

@@ -1,0 +1,15 @@
+/* Time Distribution Chart Styles */
+
+.no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    text-align: center;
+    color: var(--color-text-secondary);
+    padding: var(--space-xl);
+}
+
+.no-data p {
+    font-size: var(--font-size-lg);
+}

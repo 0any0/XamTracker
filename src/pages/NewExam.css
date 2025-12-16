@@ -1,0 +1,130 @@
+/* New Exam Page Styles */
+.new-exam-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: var(--space-xl);
+    animation: fadeIn var(--transition-base) ease-out;
+}
+
+.back-button {
+    align-self: flex-start;
+    margin-bottom: var(--space-xl);
+}
+
+.new-exam-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.new-exam-card {
+    padding: var(--space-2xl);
+}
+
+.new-exam-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.new-exam-header h1 {
+    margin-bottom: var(--space-xs);
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.new-exam-header p {
+    color: var(--color-text-secondary);
+}
+
+.form-group {
+    margin-bottom: var(--space-xl);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-md);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.form-select,
+.form-input {
+    width: 100%;
+    padding: var(--space-md);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    transition: var(--transition-fast);
+}
+
+.form-select:focus,
+.form-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-weight: 500;
+}
+
+.radio-label.active {
+    border-color: var(--color-primary);
+    background: var(--color-bg-secondary);
+    /* Or a light tint */
+}
+
+.radio-label input {
+    accent-color: var(--color-primary);
+}
+
+.exam-instructions {
+    background: var(--color-bg-secondary);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2xl);
+}
+
+.exam-instructions h3 {
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+}
+
+.exam-instructions ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.exam-instructions li {
+    margin-bottom: var(--space-sm);
+}

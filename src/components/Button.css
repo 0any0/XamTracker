@@ -1,0 +1,154 @@
+/* Button Component Styles */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+    white-space: nowrap;
+    user-select: none;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-text {
+    position: relative;
+    z-index: 1;
+}
+
+/* Sizes */
+.btn-small {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-sm);
+}
+
+.btn-medium {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-base);
+}
+
+.btn-large {
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--font-size-lg);
+}
+
+/* Variants */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover:not(.btn-disabled) {
+    background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 2px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(.btn-disabled) {
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--color-success), hsl(142, 71%, 55%));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover:not(.btn-disabled) {
+    background: linear-gradient(135deg, hsl(142, 71%, 40%), var(--color-success));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-error {
+    background: linear-gradient(135deg, var(--color-error), hsl(0, 84%, 70%));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-error:hover:not(.btn-disabled) {
+    background: linear-gradient(135deg, hsl(0, 84%, 50%), var(--color-error));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, var(--color-warning), hsl(38, 92%, 60%));
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-warning:hover:not(.btn-disabled) {
+    background: linear-gradient(135deg, hsl(38, 92%, 45%), var(--color-warning));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--color-primary);
+}
+
+.btn-ghost:hover:not(.btn-disabled) {
+    background: var(--color-surface-hover);
+}
+
+/* States */
+.btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-full {
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .btn-large {
+        padding: var(--space-sm) var(--space-lg);
+        font-size: var(--font-size-base);
+    }
+}
