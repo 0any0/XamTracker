@@ -65,7 +65,7 @@ const Settings = ({ exportAllData, importData, clearAllData, theme, toggleTheme 
                         <div>
                             <div className="setting-label">Export Data</div>
                             <div className="setting-description">
-                                Download all your data as JSON file for backup
+                                Download as JSON. Save to Google Drive / OneDrive to sync with other devices.
                             </div>
                         </div>
                         <Button
@@ -81,7 +81,7 @@ const Settings = ({ exportAllData, importData, clearAllData, theme, toggleTheme 
                         <div>
                             <div className="setting-label">Import Data</div>
                             <div className="setting-description">
-                                Restore data from a previously exported JSON file
+                                Restore data from a backup or cloud drive file.
                             </div>
                         </div>
                         <div>
