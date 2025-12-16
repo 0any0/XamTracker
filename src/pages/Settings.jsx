@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import './Settings.css';
 
 const Settings = ({ exportAllData, importData, clearAllData, theme, toggleTheme }) => {
+    const fileInputRef = React.useRef(null);
 
     const handleExportJSON = () => {
         const data = exportAllData();
@@ -83,17 +84,22 @@ const Settings = ({ exportAllData, importData, clearAllData, theme, toggleTheme 
                                 Restore data from a previously exported JSON file
                             </div>
                         </div>
-                        <label className="import-button">
+                        <div>
                             <input
+                                ref={fileInputRef}
                                 type="file"
                                 accept=".json"
                                 onChange={handleImportJSON}
                                 style={{ display: 'none' }}
                             />
-                            <Button variant="secondary" icon={<Upload size={16} />}>
+                            <Button
+                                variant="secondary"
+                                icon={<Upload size={16} />}
+                                onClick={() => fileInputRef.current.click()}
+                            >
                                 Import
                             </Button>
-                        </label>
+                        </div>
                     </div>
 
                     <div className="settings-item">
