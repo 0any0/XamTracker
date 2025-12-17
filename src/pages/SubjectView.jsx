@@ -7,7 +7,7 @@ import Menu from '../components/Menu';
 import { QuestionStatus } from '../hooks/useStore';
 import './SubjectView.css';
 
-const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, getSubjectStats, updateSubject, deleteSubject, deleteExam }) => {
+const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, getSubjectStats, updateSubject, deleteSubject, deleteExam, updateExam }) => {
     const { subjectId } = useParams();
     const navigate = useNavigate();
 
@@ -53,6 +53,13 @@ const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, 
     const handleDeleteExam = (examId) => {
         if (confirm('Delete this exam record?')) {
             deleteExam(examId);
+        }
+    };
+
+    const handleRenameExam = (exam) => {
+        const newName = prompt('Enter new exam name:', exam.name || exam.subjectName);
+        if (newName && newName.trim()) {
+            updateExam(exam.id, { name: newName.trim() });
         }
     };
 
@@ -136,19 +143,31 @@ const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, 
                             <Card
                                 key={exam.id}
                                 className="exam-item clickable-card"
-                                onClick={() => navigate(`/exam-details/${exam.id}`)}
+                                onClick={() => {
+                                    if (exam.status === 'active') navigate(`/exam/${exam.id}`);
+                                    else if (exam.status === 'completed') navigate(`/review/${exam.id}`);
+                                    else navigate(`/exam-details/${exam.id}`);
+                                }}
                             >
                                 <div className="exam-item-header">
-                                    <div className="exam-date">
-                                        <Calendar size={16} />
-                                        {formatDate(exam.startTime)}
+                                    <div className="exam-info-col">
+                                        <div className="exam-name-list">{exam.name || exam.subjectName}</div>
+                                        <div className="exam-date">
+                                            <Calendar size={14} />
+                                            {formatDate(exam.startTime)}
+                                        </div>
                                     </div>
                                     <div className={`exam-status status-${exam.status}`}>
                                         {exam.status}
                                     </div>
-                                    <div className="exam-menu-trigger">
+                                    <div className="exam-menu-trigger" onClick={(e) => e.stopPropagation()}>
                                         <Menu
                                             items={[
+                                                {
+                                                    label: 'Rename',
+                                                    icon: <Edit2 size={16} />,
+                                                    onClick: () => handleRenameExam(exam)
+                                                },
                                                 {
                                                     label: 'Delete Exam',
                                                     icon: <Trash2 size={16} />,

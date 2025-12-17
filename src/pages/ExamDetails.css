@@ -12,10 +12,7 @@
 .details-header h1 {
     margin: 0 0 var(--space-xs) 0;
     font-size: var(--font-size-2xl);
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--color-text);
 }
 
 .exam-meta {

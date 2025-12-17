@@ -91,6 +91,18 @@
     margin-bottom: var(--space-md);
 }
 
+.exam-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.exam-name-list {
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+}
+
 .exam-date {
     display: flex;
     align-items: center;
@@ -172,50 +184,59 @@
 }
 
 /* Notes List */
+/* Notes List */
 .notes-list {
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--space-lg);
 }
 
 .note-item {
     padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .note-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-sm);
     margin-bottom: var(--space-md);
 }
 
 .note-question {
-    display: inline-block;
-    padding: var(--space-xs) var(--space-md);
-    background: var(--color-primary);
-    color: white;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    padding: 0;
+    background: none;
+    font-size: var(--font-size-md);
 }
 
 .note-date {
-    color: var(--color-text-tertiary);
     font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
 }
 
 .note-content {
-    padding: var(--space-md);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
     color: var(--color-text);
     line-height: 1.6;
-    margin-bottom: var(--space-md);
+    flex-grow: 1;
     white-space: pre-wrap;
+    background: none;
+    padding: 0;
+    margin-bottom: var(--space-md);
 }
 
 .note-status {
-    font-size: var(--font-size-sm);
-    font-weight: 500;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    align-self: flex-end;
 }
 
 .note-status.status-correct {
@@ -229,6 +250,8 @@
 .note-status.status-unattempted {
     color: var(--color-warning);
 }
+
+/* Responsive */
 
 .empty-message {
     text-align: center;

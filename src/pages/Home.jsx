@@ -6,7 +6,7 @@ import Card from '../components/Card';
 import Menu from '../components/Menu';
 import './Home.css';
 
-const Home = ({ subjects, addSubject, deleteSubject, updateSubject, getExamsBySubject }) => {
+const Home = ({ subjects, exams, addSubject, deleteSubject, updateSubject, getExamsBySubject }) => {
     const navigate = useNavigate();
     const [showNewSubject, setShowNewSubject] = useState(false);
     const [newSubjectName, setNewSubjectName] = useState('');
@@ -46,6 +46,55 @@ const Home = ({ subjects, addSubject, deleteSubject, updateSubject, getExamsBySu
                 <h1>My Subjects</h1>
                 <p className="page-subtitle">Select a subject to start practicing</p>
             </div>
+
+            {/* Active Exams Section */}
+            {exams && exams.some(e => ['active', 'completed'].includes(e.status)) && (
+                <div className="section" style={{ marginBottom: 'var(--space-2xl)' }}>
+                    <h2>Continue Learning</h2>
+                    <div className="exams-list">
+                        {exams
+                            .filter(e => ['active', 'completed'].includes(e.status))
+                            .map(exam => (
+                                <Card
+                                    key={exam.id}
+                                    className="exam-item clickable-card"
+                                    onClick={() => {
+                                        if (exam.status === 'active') navigate(`/exam/${exam.id}`);
+                                        else navigate(`/review/${exam.id}`);
+                                    }}
+                                    style={{ borderLeft: `4px solid var(--color-${exam.status === 'active' ? 'primary' : 'warning'})` }}
+                                >
+                                    <div className="exam-item-header">
+                                        <div className="exam-info-col">
+                                            <div className="exam-name-list">{exam.name || exam.subjectName}</div>
+                                            <div className="exam-date">
+                                                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                                                    {exam.subjectName} • {new Date(exam.startTime).toLocaleDateString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant={exam.status === 'active' ? 'primary' : 'warning'}
+                                            size="small"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (exam.status === 'active') navigate(`/exam/${exam.id}`);
+                                                else navigate(`/review/${exam.id}`);
+                                            }}
+                                        >
+                                            {exam.status === 'active' ? 'Resume Exam' : 'Evaluate Now'}
+                                        </Button>
+                                    </div>
+                                    <div className="exam-status-text" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                                        {exam.status === 'active'
+                                            ? `${exam.questions.length} questions answered`
+                                            : 'Ready for evaluation'}
+                                    </div>
+                                </Card>
+                            ))}
+                    </div>
+                </div>
+            )}
 
             <div className="subjects-grid">
                 {subjects.map(subject => {

@@ -8,6 +8,7 @@ import ActiveExam from './pages/ActiveExam';
 import ReviewExam from './pages/ReviewExam';
 import SubjectView from './pages/SubjectView';
 import Analytics from './pages/Analytics';
+import ExamAnalysis from './pages/ExamAnalysis';
 import Settings from './pages/Settings';
 import ExamDetails from './pages/ExamDetails';
 
@@ -27,6 +28,7 @@ function App() {
                                 updateSubject={store.updateSubject}
                                 deleteSubject={store.deleteSubject}
                                 getExamsBySubject={store.getExamsBySubject}
+                                exams={store.exams}
                             />
                         }
                     />
@@ -48,6 +50,7 @@ function App() {
                                 getExamById={store.getExamById}
                                 addQuestion={store.addQuestion}
                                 updateQuestionAtIndex={store.updateQuestionAtIndex}
+                                updateExam={store.updateExam}
                                 completeExam={store.completeExam}
                             />
                         }
@@ -59,6 +62,7 @@ function App() {
                             <ReviewExam
                                 getExamById={store.getExamById}
                                 reviewExam={store.reviewExam}
+                                updateExam={store.updateExam}
                             />
                         }
                     />
@@ -69,6 +73,7 @@ function App() {
                             <ExamDetails
                                 getExamById={store.getExamById}
                                 deleteExam={store.deleteExam}
+                                updateExam={store.updateExam}
                             />
                         }
                     />
@@ -84,6 +89,16 @@ function App() {
                                 updateSubject={store.updateSubject}
                                 deleteSubject={store.deleteSubject}
                                 deleteExam={store.deleteExam}
+                                updateExam={store.updateExam}
+                            />
+                        }
+                    />
+
+                    <Route
+                        path="/analysis/:examId"
+                        element={
+                            <ExamAnalysis
+                                getExamById={store.getExamById}
                             />
                         }
                     />
@@ -108,6 +123,8 @@ function App() {
                                 clearAllData={store.clearAllData}
                                 theme={store.theme}
                                 toggleTheme={store.toggleTheme}
+                                accentColor={store.accentColor}
+                                changeAccentColor={store.changeAccentColor}
                             />
                         }
                     />

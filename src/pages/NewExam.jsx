@@ -13,6 +13,7 @@ const NewExam = ({ subjects, createExam }) => {
     const [selectedSubjectId, setSelectedSubjectId] = useState(
         preselectedSubject?.id || (subjects[0]?.id || '')
     );
+    const [examName, setExamName] = useState('');
 
     const [config, setConfig] = useState({
         questionCount: '',
@@ -22,7 +23,7 @@ const NewExam = ({ subjects, createExam }) => {
         if (!selectedSubjectId) return;
 
         const subject = subjects.find(s => s.id === selectedSubjectId);
-        const exam = createExam(selectedSubjectId, subject.name, config);
+        const exam = createExam(selectedSubjectId, subject.name, examName, config);
 
         navigate(`/exam/${exam.id}`);
     };
@@ -65,6 +66,20 @@ const NewExam = ({ subjects, createExam }) => {
                                 ))
                             )}
                         </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="examName" className="form-label">
+                            Exam Name (Optional)
+                        </label>
+                        <input
+                            type="text"
+                            id="examName"
+                            className="form-input"
+                            placeholder="e.g., Midterm Review, Chapter 1 Quiz"
+                            value={examName}
+                            onChange={(e) => setExamName(e.target.value)}
+                        />
                     </div>
 
                     <div className="form-group">

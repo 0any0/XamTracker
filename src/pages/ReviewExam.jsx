@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, X, Minus, ChevronLeft, ChevronRight, Save } from 'lucide-react';
+import { Check, X, Minus, ChevronLeft, ChevronRight, Save, Circle, Pause } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { QuestionStatus } from '../hooks/useStore';
 import './ReviewExam.css';
 
-const ReviewExam = ({ getExamById, reviewExam }) => {
+const ReviewExam = ({ getExamById, reviewExam, updateExam }) => {
     const { examId } = useParams();
     const navigate = useNavigate();
     const [exam, setExam] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [reviewedQuestions, setReviewedQuestions] = useState([]);
+    const [negativeMark, setNegativeMark] = useState(1);
 
     useEffect(() => {
         const examData = getExamById(examId);
-        if (!examData || examData.status !== 'completed') {
+        if (!examData || (examData.status !== 'completed' && examData.status !== 'reviewed')) {
             navigate('/');
             return;
         }
@@ -29,13 +30,14 @@ const ReviewExam = ({ getExamById, reviewExam }) => {
         const currentQ = updated[currentQuestionIndex];
         currentQ.status = status;
 
-        // Auto-assign default marks if currently 0
-        if (status === QuestionStatus.CORRECT && (!currentQ.marks || currentQ.marks === 0)) {
-            currentQ.marks = 4; // Default to 4 for JEE/NEET style, or just 1. Let's use 1 as generic default for now.
+        // Auto-assign default marks
+        if (status === QuestionStatus.CORRECT) {
+            // Only overwrite if it was 0 or negative (from previous incorrect)
+            if (!currentQ.marks || currentQ.marks <= 0) {
+                currentQ.marks = 4;
+            }
         } else if (status === QuestionStatus.INCORRECT) {
-            // Maybe subtract marks? For now let's not force negative unless user enters it.
-            // But usually incorrect is 0 or negative. Let's default to 0 if it was positive.
-            if (currentQ.marks > 0) currentQ.marks = 0;
+            currentQ.marks = -Math.abs(negativeMark); // Ensure it's negative
         } else if (status === QuestionStatus.UNATTEMPTED) {
             currentQ.marks = 0;
         }
@@ -90,7 +92,7 @@ const ReviewExam = ({ getExamById, reviewExam }) => {
     return (
         <div className="review-exam-page">
             <div className="review-header">
-                <h1>Review Exam - {exam.subjectName}</h1>
+                <h1>Review Exam - {exam.name || exam.subjectName}</h1>
                 <p className="review-subtitle">
                     Mark each question and add notes for revision
                 </p>
@@ -138,6 +140,15 @@ const ReviewExam = ({ getExamById, reviewExam }) => {
                             >
                                 <Minus size={24} />
                                 Missed
+                            </button>
+
+                            <button
+                                className={`status-btn status-evaluate-later ${currentQuestion.status === QuestionStatus.EVALUATE_LATER ? 'active' : ''
+                                    }`}
+                                onClick={() => handleStatusChange(QuestionStatus.EVALUATE_LATER)}
+                            >
+                                <Circle size={24} />
+                                Later
                             </button>
                         </div>
                     </div>
@@ -193,21 +204,54 @@ const ReviewExam = ({ getExamById, reviewExam }) => {
                         </Button>
                     </div>
 
-                    <div className="review-footer">
+                    <div className="review-footer" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <Button
+                            variant="secondary"
+                            size="large"
+                            icon={<Pause size={20} />} // Using Pause icon or similar for "Later"
+                            onClick={() => {
+                                // Save progress but don't finish
+                                updateExam(examId, { questions: reviewedQuestions });
+                                navigate(`/subject/${exam.subjectId}`);
+                            }}
+                        >
+                            Evaluate Later
+                        </Button>
                         <Button
                             variant="success"
                             size="large"
-                            fullWidth
                             icon={<Save size={20} />}
                             onClick={handleSaveReview}
                         >
-                            Save Review & Finish
+                            {exam.status === 'reviewed' ? 'Update Review' : 'Finish Evaluation'}
                         </Button>
                     </div>
                 </Card >
 
                 {/* Progress Sidebar */}
                 < Card className="progress-sidebar" >
+                    <div style={{ marginBottom: 'var(--space-lg)', paddingBottom: 'var(--space-md)', borderBottom: '1px solid var(--color-border)' }}>
+                        <h3 style={{ fontSize: 'var(--font-size-base)', marginBottom: 'var(--space-sm)' }}>Marking Scheme</h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+                            <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>Negative Mark:</label>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.5"
+                                value={negativeMark}
+                                onChange={(e) => setNegativeMark(parseFloat(e.target.value) || 0)}
+                                style={{
+                                    width: '60px',
+                                    padding: '4px 8px',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--color-border)',
+                                    background: 'var(--color-bg)',
+                                    color: 'var(--color-text)'
+                                }}
+                            />
+                        </div>
+                    </div>
+
                     <h3>Review Progress</h3>
                     <div className="progress-grid">
                         {reviewedQuestions.map((q, index) => (
@@ -233,6 +277,10 @@ const ReviewExam = ({ getExamById, reviewExam }) => {
                         <div className="progress-stat">
                             <span className="stat-icon missed">−</span>
                             <span>{reviewedQuestions.filter(q => q.status === QuestionStatus.UNATTEMPTED).length}</span>
+                        </div>
+                        <div className="progress-stat">
+                            <span className="stat-icon evaluate-later" style={{ color: 'var(--color-primary)' }}>○</span>
+                            <span>{reviewedQuestions.filter(q => q.status === QuestionStatus.EVALUATE_LATER).length}</span>
                         </div>
                     </div>
                 </Card >

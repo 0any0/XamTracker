@@ -5,6 +5,8 @@ export const QuestionStatus = {
   UNATTEMPTED: 'unattempted',
   CORRECT: 'correct',
   INCORRECT: 'incorrect',
+  REVIEW_LATER: 'review_later',
+  EVALUATE_LATER: 'evaluate_later',
 };
 
 // LocalStorage keys
@@ -12,6 +14,18 @@ const STORAGE_KEYS = {
   SUBJECTS: 'exam_tracker_subjects',
   EXAMS: 'exam_tracker_exams',
   THEME: 'exam_tracker_theme',
+  ACCENT_COLOR: 'exam_tracker_accent',
+};
+
+const ACCENT_COLORS = {
+  blue: { h: 220, s: 90, l: 56 },
+  purple: { h: 270, s: 85, l: 58 },
+  green: { h: 142, s: 71, l: 45 },
+  indigo: { h: 245, s: 80, l: 60 },
+  orange: { h: 25, s: 95, l: 53 },
+  pink: { h: 330, s: 80, l: 55 },
+  red: { h: 345, s: 80, l: 55 },
+  teal: { h: 175, s: 80, l: 40 },
 };
 
 // Initialize default data
@@ -38,6 +52,7 @@ export const useStore = () => {
   const [subjects, setSubjects] = useState(() => getInitialData(STORAGE_KEYS.SUBJECTS, []));
   const [exams, setExams] = useState(() => getInitialData(STORAGE_KEYS.EXAMS, []));
   const [theme, setTheme] = useState(() => getInitialData(STORAGE_KEYS.THEME, 'light'));
+  const [accentColor, setAccentColor] = useState(() => getInitialData(STORAGE_KEYS.ACCENT_COLOR, 'blue'));
 
   // Persist subjects to localStorage
   useEffect(() => {
@@ -54,6 +69,24 @@ export const useStore = () => {
     saveToStorage(STORAGE_KEYS.THEME, theme);
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  // Persist text color to localStorage and apply CSS variables
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.ACCENT_COLOR, accentColor);
+    const color = ACCENT_COLORS[accentColor] || ACCENT_COLORS.blue;
+
+    // Adjust for dark mode if necessary (usually simpler to keep consistent hue)
+    // We update the CSS variables on the root.
+    const isDark = theme === 'dark';
+    const l = isDark ? Math.min(color.l + 5, 90) : color.l;
+
+    document.documentElement.style.setProperty('--color-primary', `hsl(${color.h}, ${color.s}%, ${l}%)`);
+    document.documentElement.style.setProperty('--color-primary-dark', `hsl(${color.h}, ${color.s}%, ${Math.max(l - 10, 20)}%)`);
+    document.documentElement.style.setProperty('--color-primary-light', `hsl(${color.h}, ${color.s}%, ${Math.min(l + 10, 95)}%)`);
+
+    // Also update Info/Success/etc if we wanted a "monochrome" mode, but let's keep semantic colors separate.
+    // However, if the user picks Green, semantic Success Green might clash. We generally keep semantic colors fixed.
+  }, [accentColor, theme]);
 
   // Subject operations
   const addSubject = (name) => {
@@ -81,11 +114,12 @@ export const useStore = () => {
   };
 
   // Exam operations
-  const createExam = (subjectId, subjectName, config = {}) => {
+  const createExam = (subjectId, subjectName, examName, config = {}) => {
     const newExam = {
       id: Date.now().toString(),
       subjectId,
       subjectName,
+      name: examName || `${subjectName} Practice`, // Default name if none provided
       startTime: new Date().toISOString(),
       endTime: null,
       questions: [],
@@ -348,11 +382,16 @@ export const useStore = () => {
     }
   };
 
+  const changeAccentColor = (color) => {
+    setAccentColor(color);
+  };
+
   return {
     // State
     subjects,
     exams,
     theme,
+    accentColor,
 
     // Subject operations
     addSubject,
@@ -374,6 +413,7 @@ export const useStore = () => {
 
     // Theme
     toggleTheme,
+    changeAccentColor,
 
     // Analytics
     getSubjectStats,

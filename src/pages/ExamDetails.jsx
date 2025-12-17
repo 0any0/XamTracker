@@ -1,13 +1,13 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, Clock, CheckCircle, XCircle, MinusCircle, FileText, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, CheckCircle, XCircle, MinusCircle, FileText, Trash2, Edit2, BarChart2 } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Menu from '../components/Menu';
 import { QuestionStatus } from '../hooks/useStore';
 import './ExamDetails.css';
 
-const ExamDetails = ({ getExamById, deleteExam }) => {
+const ExamDetails = ({ getExamById, deleteExam, updateExam }) => {
     const { examId } = useParams();
     const navigate = useNavigate();
     const exam = getExamById(examId);
@@ -72,6 +72,13 @@ const ExamDetails = ({ getExamById, deleteExam }) => {
         ? incorrectQuestions.reduce((sum, q) => sum + (q.timeSpent || 0), 0) / incorrectQuestions.length
         : 0;
 
+    const handleRenameExam = () => {
+        const newName = prompt('Enter new exam name:', exam.name || exam.subjectName);
+        if (newName && newName.trim()) {
+            updateExam(examId, { name: newName.trim() });
+        }
+    };
+
     return (
         <div className="exam-details-page">
             <Button
@@ -85,9 +92,23 @@ const ExamDetails = ({ getExamById, deleteExam }) => {
 
             <div className="details-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <h1>{exam.subjectName} - Exam Details</h1>
+                    <h1>{exam.name || exam.subjectName} - Exam Details</h1>
                     <Menu
                         items={[
+                            {
+                                label: 'Rename Exam',
+                                icon: <Edit2 size={16} />,
+                                onClick: handleRenameExam
+                            },
+                            // Show Edit Review only if already reviewed
+                            ...(exam.status === 'reviewed' ? [{
+                                label: 'Edit Review',
+                                icon: <FileText size={16} />, // Reusing FileText or maybe Pencil would be better but Edit2 is already used. let's use Edit2 or maybe a different one. 
+                                // Actually let's use Edit2 again or just pass. 
+                                // Let's use the Import Check icon (CheckCircle) or just standard Edit.
+                                // Let's use FileText for "Review" context.
+                                onClick: () => navigate(`/review/${examId}`)
+                            }] : []),
                             {
                                 label: 'Delete Exam',
                                 icon: <Trash2 size={16} />,
@@ -108,6 +129,34 @@ const ExamDetails = ({ getExamById, deleteExam }) => {
                     </div>
                 </div>
             </div>
+
+            {exam.status === 'active' && (
+                <div style={{ marginBottom: 'var(--space-xl)' }}>
+                    <Button
+                        variant="primary"
+                        fullWidth
+                        size="large"
+                        icon={<FileText size={20} />}
+                        onClick={() => navigate(`/exam/${examId}`)}
+                    >
+                        Resume Exam
+                    </Button>
+                </div>
+            )}
+
+            {exam.status === 'completed' && (
+                <div style={{ marginBottom: 'var(--space-xl)' }}>
+                    <Button
+                        variant="warning"
+                        fullWidth
+                        size="large"
+                        icon={<FileText size={20} />}
+                        onClick={() => navigate(`/review/${examId}`)}
+                    >
+                        Resume Evaluation
+                    </Button>
+                </div>
+            )}
 
             <div className="details-stats-grid">
                 <Card className="details-stat-card">
@@ -153,6 +202,16 @@ const ExamDetails = ({ getExamById, deleteExam }) => {
                         <span className="dot incorrect"></span> Incorrect: <strong>{formatTime(avgIncorrectTime)}</strong>
                     </div>
                 </Card>
+            </div>
+
+            <div style={{ marginBottom: 'var(--space-xl)', display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                    variant="secondary"
+                    icon={<BarChart2 size={20} />}
+                    onClick={() => navigate(`/analysis/${examId}`)}
+                >
+                    Detailed Analysis
+                </Button>
             </div>
 
             <Card className="questions-list-card">
