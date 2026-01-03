@@ -272,6 +272,7 @@
 }
 
 /* Responsive */
+/* Responsive */
 @media (max-width: 1024px) {
     .review-container {
         grid-template-columns: 1fr;
@@ -279,16 +280,26 @@
 
     .progress-sidebar {
         position: static;
+        order: 2;
+        /* Sidebar below */
+        max-height: 300px;
+        overflow-y: auto;
     }
 }
 
 @media (max-width: 768px) {
     .review-card {
-        padding: var(--space-lg);
+        padding: var(--space-md);
     }
 
     .status-buttons {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        /* 2 columns for better space usage */
+    }
+
+    .status-btn {
+        padding: var(--space-md);
+        font-size: var(--font-size-sm);
     }
 
     .question-review-header {
@@ -297,6 +308,14 @@
     }
 
     .review-navigation {
+        /* flex-direction: column; -- Don't stack buttons, keep them side-by-side but smaller if needed */
+        margin-bottom: var(--space-md);
+    }
+
+    /* Stack footer buttons though */
+    .review-footer {
+        /* Keep grid but reduce gap if needed or stack if text is long */
+        display: flex !important;
         flex-direction: column;
     }
 }
