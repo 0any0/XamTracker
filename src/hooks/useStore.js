@@ -114,7 +114,7 @@ export const useStore = () => {
   };
 
   // Exam operations
-  const createExam = (subjectId, subjectName, examName, config = {}) => {
+  const createExam = (subjectId, subjectName, examName, config = {}, sections = []) => {
     const newExam = {
       id: Date.now().toString(),
       subjectId,
@@ -127,7 +127,8 @@ export const useStore = () => {
       status: 'active', // active, completed, reviewed
       config: {
         questionCount: config.questionCount || null, // null means unlimited
-      }
+      },
+      sections: sections || []
     };
     setExams([...exams, newExam]);
     return newExam;

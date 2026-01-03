@@ -217,14 +217,33 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
     const isLastConfiguredQuestion = exam.config?.questionCount &&
         currentQuestion?.number >= parseInt(exam.config.questionCount);
 
+    // Determine current section
+    const currentSection = exam.sections?.find(
+        s => currentQuestion?.number >= s.startQuestion && currentQuestion?.number <= s.endQuestion
+    );
+
     return (
         <div className="active-exam-page">
             <div className="exam-header-bar">
                 <div className="exam-info">
                     <h2>{exam.name || exam.subjectName}</h2>
-                    <span className="question-count">
-                        Question {currentQuestion?.number}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                        <span className="question-count">
+                            Question {currentQuestion?.number}
+                        </span>
+                        {currentSection && (
+                            <span className="section-badge" style={{
+                                fontSize: '0.85rem',
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                background: 'var(--color-primary-light)',
+                                color: 'var(--color-primary-dark)',
+                                fontWeight: 600
+                            }}>
+                                {currentSection.name}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 <div className="exam-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

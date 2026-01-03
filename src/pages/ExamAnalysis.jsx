@@ -183,6 +183,70 @@ const ExamAnalysis = ({ getExamById }) => {
                         </div>
                     </div>
                 </Card>
+                {/* Section-wise Analysis */}
+                {exam.sections && exam.sections.length > 0 && (() => {
+                    const sectionLabels = exam.sections.map(s => s.name);
+                    const sectionStats = exam.sections.map(s => {
+                        const qs = exam.questions.filter(q => q.number >= s.startQuestion && q.number <= s.endQuestion);
+                        return {
+                            correct: qs.filter(q => q.status === QuestionStatus.CORRECT).length,
+                            incorrect: qs.filter(q => q.status === QuestionStatus.INCORRECT).length,
+                            missed: qs.filter(q => q.status !== QuestionStatus.CORRECT && q.status !== QuestionStatus.INCORRECT).length
+                        };
+                    });
+
+                    const sectionChartData = {
+                        labels: sectionLabels,
+                        datasets: [
+                            {
+                                label: 'Correct',
+                                data: sectionStats.map(s => s.correct),
+                                backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                            },
+                            {
+                                label: 'Incorrect',
+                                data: sectionStats.map(s => s.incorrect),
+                                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            },
+                            {
+                                label: 'Missed',
+                                data: sectionStats.map(s => s.missed),
+                                backgroundColor: 'rgba(234, 179, 8, 0.8)',
+                            }
+                        ]
+                    };
+
+                    return (
+                        <Card className="chart-card" style={{ gridColumn: '1 / -1' }}>
+                            <h3>Section Performance</h3>
+                            <div className="chart-container">
+                                <Bar
+                                    data={sectionChartData}
+                                    options={{
+                                        maintainAspectRatio: false,
+                                        scales: {
+                                            x: { stacked: true },
+                                            y: { stacked: true, beginAtZero: true }
+                                        },
+                                        plugins: {
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: (context) => {
+                                                        const label = context.dataset.label || '';
+                                                        const value = context.parsed.y;
+                                                        const total = context.chart.data.datasets.reduce((sum, ds) => sum + ds.data[context.dataIndex], 0);
+                                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(0) + '%' : '0%';
+                                                        return `${label}: ${value} (${percentage})`;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </Card>
+                    );
+                })()}
             </div>
         </div>
     );
