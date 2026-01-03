@@ -271,6 +271,46 @@
     color: var(--color-warning);
 }
 
+/* Update for marks stepper */
+.marks-stepper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.stepper-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.stepper-btn:hover {
+    border-color: var(--color-primary);
+    background: var(--color-bg-secondary);
+}
+
+.stepper-btn:active {
+    transform: scale(0.95);
+}
+
+/* Modify existing input to fit better */
+.marks-input {
+    width: 80px;
+    text-align: center;
+}
+
+.marks-input.centered {
+    text-align: center;
+}
+
 /* Responsive */
 /* Responsive */
 @media (max-width: 1024px) {

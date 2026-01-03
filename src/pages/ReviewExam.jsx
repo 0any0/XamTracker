@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Check, X, Minus, ChevronLeft, ChevronRight, Save, Circle, Pause } from 'lucide-react';
+import { Check, X, Minus, ChevronLeft, ChevronRight, Save, Circle, Pause, Plus } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { QuestionStatus } from '../hooks/useStore';
@@ -156,13 +156,27 @@ const ReviewExam = ({ getExamById, reviewExam, updateExam }) => {
 
                     <div className="marks-section">
                         <label className="marks-label">Marks Awarded</label>
-                        <input
-                            type="number"
-                            className="marks-input"
-                            value={currentQuestion.marks || 0}
-                            onChange={(e) => handleMarksChange(e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                        />
+                        <div className="marks-stepper">
+                            <button
+                                className="stepper-btn"
+                                onClick={() => handleMarksChange((parseFloat(currentQuestion.marks) || 0) - (currentQuestion.marks % 1 !== 0 ? 0.5 : 1))}
+                            >
+                                <Minus size={18} />
+                            </button>
+                            <input
+                                type="number"
+                                className="marks-input centered"
+                                value={currentQuestion.marks || 0}
+                                onChange={(e) => handleMarksChange(e.target.value)}
+                                onFocus={(e) => e.target.select()}
+                            />
+                            <button
+                                className="stepper-btn"
+                                onClick={() => handleMarksChange((parseFloat(currentQuestion.marks) || 0) + (currentQuestion.marks % 1 !== 0 ? 0.5 : 1))}
+                            >
+                                <Plus size={18} />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="note-section">
