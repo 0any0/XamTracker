@@ -148,7 +148,7 @@ const NewExam = ({ subjects, createExam }) => {
                             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 30px', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)', padding: '0 var(--space-xs)' }}>
                                 <label className="form-label" style={{ fontSize: '0.8rem' }}>Section Name</label>
                                 <label className="form-label" style={{ fontSize: '0.8rem' }}>Questions</label>
-                                <label className="form-label" style={{ fontSize: '0.8rem' }}>Marks</label>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>Marks / Q</label>
                                 <span></span>
                             </div>
                             {sections.map((section, index) => (
@@ -172,7 +172,8 @@ const NewExam = ({ subjects, createExam }) => {
                                         type="number"
                                         className="form-input"
                                         placeholder="Marks"
-                                        min="1"
+                                        min="0.5"
+                                        step="0.5"
                                         value={section.marks || ''}
                                         onChange={(e) => updateSection(section.id, 'marks', e.target.value)}
                                     />
@@ -207,7 +208,7 @@ const NewExam = ({ subjects, createExam }) => {
                             <div style={{ marginTop: 'var(--space-md)', textAlign: 'right', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
                                 Total: <strong>{sections.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0)} Qs</strong>
                                 <span style={{ margin: '0 8px' }}>|</span>
-                                <strong>{sections.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0)} Marks</strong>
+                                <strong>{sections.reduce((sum, s) => sum + ((parseInt(s.count) || 0) * (parseFloat(s.marks) || 0)), 0)} Marks</strong>
                             </div>
                         </div>
                     ) : (

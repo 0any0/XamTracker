@@ -134,21 +134,19 @@ const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, 
                 </Card>
             </div>
 
-            {/* Exams List */}
-            <div className="section">
-                <h2>Exam History</h2>
-                <div className="exams-list">
-                    {exams.length === 0 ? (
-                        <div className="empty-message">No exams yet. Start your first exam!</div>
-                    ) : (
-                        exams.map(exam => (
+            {/* Pending Evaluations Section */}
+            {exams.filter(e => e.status === 'completed' || e.status === 'active').length > 0 && (
+                <div className="section">
+                    <h2>Needs Evaluation</h2>
+                    <div className="pending-exams-container" style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'thin' }}>
+                        {exams.filter(e => e.status === 'completed' || e.status === 'active').map(exam => (
                             <Card
                                 key={exam.id}
                                 className="exam-item clickable-card"
+                                style={{ minWidth: '280px', flex: '0 0 auto', border: '1px solid var(--color-primary)' }}
                                 onClick={() => {
                                     if (exam.status === 'active') navigate(`/exam/${exam.id}`);
-                                    else if (exam.status === 'completed') navigate(`/review/${exam.id}`);
-                                    else navigate(`/exam-details/${exam.id}`);
+                                    else navigate(`/review/${exam.id}`);
                                 }}
                             >
                                 <div className="exam-item-header">
@@ -160,7 +158,45 @@ const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, 
                                         </div>
                                     </div>
                                     <div className={`exam-status status-${exam.status}`}>
-                                        {exam.status}
+                                        {exam.status === 'active' ? 'Ongoing' : 'Evaluate'}
+                                    </div>
+                                </div>
+                                <div className="exam-stats-row">
+                                    <div className="exam-stat">
+                                        <span className="stat-icon">#</span>
+                                        {exam.questions.length} Qs
+                                    </div>
+                                    <div className="exam-stat">
+                                        <Clock size={14} />
+                                        {formatTime(Math.floor(exam.totalTime / 1000))}
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Exam History (Reviewed) */}
+            <div className="section">
+                <h2>Exam History</h2>
+                <div className="exams-list">
+                    {exams.filter(e => e.status === 'reviewed').length === 0 ? (
+                        <div className="empty-message">No reviewed exams yet.</div>
+                    ) : (
+                        exams.filter(e => e.status === 'reviewed').map(exam => (
+                            <Card
+                                key={exam.id}
+                                className="exam-item clickable-card"
+                                onClick={() => navigate(`/exam-details/${exam.id}`)}
+                            >
+                                <div className="exam-item-header">
+                                    <div className="exam-info-col">
+                                        <div className="exam-name-list">{exam.name || exam.subjectName}</div>
+                                        <div className="exam-date">
+                                            <Calendar size={14} />
+                                            {formatDate(exam.startTime)}
+                                        </div>
                                     </div>
                                     <div className="exam-menu-trigger" onClick={(e) => e.stopPropagation()}>
                                         <Menu
@@ -192,22 +228,20 @@ const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, 
                                     </div>
                                 </div>
 
-                                {exam.status === 'reviewed' && (
-                                    <div className="exam-results">
-                                        <span className="result-badge correct">
-                                            <CheckCircle size={14} />
-                                            {exam.questions.filter(q => q.status === QuestionStatus.CORRECT).length}
-                                        </span>
-                                        <span className="result-badge incorrect">
-                                            <XCircle size={14} />
-                                            {exam.questions.filter(q => q.status === QuestionStatus.INCORRECT).length}
-                                        </span>
-                                        <span className="result-badge missed">
-                                            <MinusCircle size={14} />
-                                            {exam.questions.filter(q => q.status === QuestionStatus.UNATTEMPTED).length}
-                                        </span>
-                                    </div>
-                                )}
+                                <div className="exam-results">
+                                    <span className="result-badge correct">
+                                        <CheckCircle size={14} />
+                                        {exam.questions.filter(q => q.status === QuestionStatus.CORRECT).length}
+                                    </span>
+                                    <span className="result-badge incorrect">
+                                        <XCircle size={14} />
+                                        {exam.questions.filter(q => q.status === QuestionStatus.INCORRECT).length}
+                                    </span>
+                                    <span className="result-badge missed">
+                                        <MinusCircle size={14} />
+                                        {exam.questions.filter(q => q.status === QuestionStatus.UNATTEMPTED).length}
+                                    </span>
+                                </div>
                             </Card>
                         ))
                     )}

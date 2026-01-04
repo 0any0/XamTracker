@@ -47,11 +47,19 @@ const Home = ({ subjects, exams, addSubject, deleteSubject, updateSubject, getEx
                 <p className="page-subtitle">Select a subject to start practicing</p>
             </div>
 
-            {/* Active Exams Section */}
+            {/* Active Exams Section (Continue Learning) */}
             {exams && exams.some(e => ['active', 'completed'].includes(e.status)) && (
-                <div className="section" style={{ marginBottom: 'var(--space-2xl)' }}>
+                <div className="section" style={{ marginBottom: 'var(--space-xl)' }}>
                     <h2>Continue Learning</h2>
-                    <div className="exams-list">
+                    <div className="continue-learning-list hide-scrollbar" style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        overflowX: 'auto',
+                        paddingBottom: '0.8rem',
+                        flexWrap: 'nowrap',
+                        width: '100%',
+                        WebkitOverflowScrolling: 'touch' // Smooth scroll for touch
+                    }}>
                         {exams
                             .filter(e => ['active', 'completed'].includes(e.status))
                             .map(exam => (
@@ -62,33 +70,51 @@ const Home = ({ subjects, exams, addSubject, deleteSubject, updateSubject, getEx
                                         if (exam.status === 'active') navigate(`/exam/${exam.id}`);
                                         else navigate(`/review/${exam.id}`);
                                     }}
-                                    style={{ borderLeft: `4px solid var(--color-${exam.status === 'active' ? 'primary' : 'warning'})` }}
+                                    style={{
+                                        minWidth: '300px', // Fixed width to prevent compression
+                                        width: '300px',
+                                        flexShrink: 0, // CRITICAL: Prevent shrinking
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        border: '1px solid var(--color-border)',
+                                        padding: '1.25rem',
+                                        marginBottom: '2px' // Prevent shadow clipping
+                                    }}
                                 >
-                                    <div className="exam-item-header">
-                                        <div className="exam-info-col">
-                                            <div className="exam-name-list">{exam.name || exam.subjectName}</div>
-                                            <div className="exam-date">
-                                                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-                                                    {exam.subjectName} • {new Date(exam.startTime).toLocaleDateString()}
-                                                </span>
-                                            </div>
+                                    <div>
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+                                            {exam.subjectName} • {new Date(exam.startTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                         </div>
+                                        <div style={{ fontWeight: '600', fontSize: '1.1rem', marginBottom: '0.5rem', lineHeight: '1.3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {exam.name || `${exam.subjectName} Exam`}
+                                        </div>
+                                        <div style={{
+                                            display: 'inline-block',
+                                            fontSize: '0.75rem',
+                                            padding: '2px 8px',
+                                            borderRadius: '12px',
+                                            background: exam.status === 'active' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                                            color: exam.status === 'active' ? 'var(--color-primary)' : 'var(--color-warning)',
+                                            fontWeight: '600'
+                                        }}>
+                                            {exam.status === 'active' ? '● In Progress' : '● Needs Evaluation'}
+                                        </div>
+                                    </div>
+
+                                    <div style={{ marginTop: '1rem' }}>
                                         <Button
                                             variant={exam.status === 'active' ? 'primary' : 'warning'}
                                             size="small"
+                                            fullWidth
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 if (exam.status === 'active') navigate(`/exam/${exam.id}`);
                                                 else navigate(`/review/${exam.id}`);
                                             }}
                                         >
-                                            {exam.status === 'active' ? 'Resume Exam' : 'Evaluate Now'}
+                                            {exam.status === 'active' ? 'Resume Exam' : 'Evaluate'}
                                         </Button>
-                                    </div>
-                                    <div className="exam-status-text" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-                                        {exam.status === 'active'
-                                            ? `${exam.questions.length} questions answered`
-                                            : 'Ready for evaluation'}
                                     </div>
                                 </Card>
                             ))}

@@ -118,9 +118,9 @@ export const useStore = () => {
     // Calculate total max marks
     let totalMaxMarks = 0;
     if (sections && sections.length > 0) {
-      totalMaxMarks = sections.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
+      totalMaxMarks = sections.reduce((sum, s) => sum + ((parseInt(s.count) || 0) * (parseFloat(s.marks) || 0)), 0);
     } else if (config.totalMarks) {
-      totalMaxMarks = parseInt(config.totalMarks) || 0;
+      totalMaxMarks = parseFloat(config.totalMarks) || 0;
     }
 
     const newExam = {
