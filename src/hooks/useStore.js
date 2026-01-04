@@ -115,6 +115,14 @@ export const useStore = () => {
 
   // Exam operations
   const createExam = (subjectId, subjectName, examName, config = {}, sections = []) => {
+    // Calculate total max marks
+    let totalMaxMarks = 0;
+    if (sections && sections.length > 0) {
+      totalMaxMarks = sections.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0);
+    } else if (config.totalMarks) {
+      totalMaxMarks = parseInt(config.totalMarks) || 0;
+    }
+
     const newExam = {
       id: Date.now().toString(),
       subjectId,
@@ -127,8 +135,10 @@ export const useStore = () => {
       status: 'active', // active, completed, reviewed
       config: {
         questionCount: config.questionCount || null, // null means unlimited
+        totalMarks: totalMaxMarks > 0 ? totalMaxMarks : null,
       },
-      sections: sections || []
+      sections: sections || [],
+      totalMaxMarks: totalMaxMarks // Store explicitly for easy access
     };
     setExams([...exams, newExam]);
     return newExam;
@@ -159,7 +169,6 @@ export const useStore = () => {
         const newQuestion = {
           id: `q_${currentTime}`,
           number: questionNumber,
-          startTime: currentTime,
           startTime: currentTime,
           timeSpent: null,
           status: QuestionStatus.UNATTEMPTED,
@@ -290,19 +299,27 @@ export const useStore = () => {
     let incorrectQuestions = 0;
     let missedQuestions = 0;
     let totalTime = 0;
+    let totalObtainedMarks = 0;
+    let totalMaxMarks = 0;
 
     reviewedExams.forEach(exam => {
       totalQuestions += exam.questions.length;
       totalTime += exam.totalTime;
+      // Add up max marks if available
+      totalMaxMarks += (exam.totalMaxMarks || 0);
 
       exam.questions.forEach(q => {
         if (q.status === QuestionStatus.CORRECT) correctQuestions++;
         else if (q.status === QuestionStatus.INCORRECT) incorrectQuestions++;
         else if (q.status === QuestionStatus.UNATTEMPTED) missedQuestions++;
+
+        totalObtainedMarks += (q.marks || 0);
       });
     });
 
     const accuracy = totalQuestions > 0 ? (correctQuestions / totalQuestions) * 100 : 0;
+    const scorePercentage = totalMaxMarks > 0 ? (totalObtainedMarks / totalMaxMarks) * 100 : accuracy; // Fallback to accuracy if no marks defined
+
     const avgTimePerQuestion = totalQuestions > 0 ? totalTime / totalQuestions : 0;
 
     return {
@@ -312,9 +329,11 @@ export const useStore = () => {
       incorrectQuestions,
       missedQuestions,
       accuracy: accuracy.toFixed(1),
+      scorePercentage: scorePercentage.toFixed(1),
       avgTimePerQuestion: Math.round(avgTimePerQuestion / 1000), // in seconds
       totalTime: Math.round(totalTime / 1000), // in seconds
-      totalMarks: reviewedExams.reduce((sum, e) => sum + e.questions.reduce((qSum, q) => qSum + (q.marks || 0), 0), 0),
+      totalMarks: totalObtainedMarks,
+      totalMaxMarks,
     };
   };
 

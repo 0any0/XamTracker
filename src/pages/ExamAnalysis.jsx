@@ -39,6 +39,7 @@ const ExamAnalysis = ({ getExamById }) => {
         let correct = 0, incorrect = 0, missed = 0;
         let timeCorrect = 0, timeIncorrect = 0;
         let totalTime = 0;
+        let totalObtainedMarks = 0;
 
         exam.questions.forEach(q => {
             if (q.status === QuestionStatus.CORRECT) {
@@ -51,13 +52,22 @@ const ExamAnalysis = ({ getExamById }) => {
                 missed++;
             }
             totalTime += (q.timeSpent || 0);
+            totalObtainedMarks += (q.marks || 0);
         });
+
+        // Use stored max marks or fallback (though updateStore ensures it's stored for new exams)
+        const totalMaxMarks = exam.totalMaxMarks || 0;
+        const accuracy = exam.questions.length ? ((correct / exam.questions.length) * 100).toFixed(1) : 0;
+        const scorePercentage = totalMaxMarks > 0 ? ((totalObtainedMarks / totalMaxMarks) * 100).toFixed(1) : accuracy;
 
         return {
             correct,
             incorrect,
             missed,
-            accuracy: exam.questions.length ? ((correct / exam.questions.length) * 100).toFixed(1) : 0,
+            accuracy: accuracy,
+            scorePercentage: scorePercentage,
+            totalObtainedMarks,
+            totalMaxMarks,
             avgTimeCorrect: correct ? timeCorrect / correct : 0,
             avgTimeIncorrect: incorrect ? timeIncorrect / incorrect : 0,
             avgGlobal: exam.questions.length ? totalTime / exam.questions.length : 0
@@ -151,8 +161,8 @@ const ExamAnalysis = ({ getExamById }) => {
                     <div className="insight-item">
                         <Target className="icon-success" />
                         <div>
-                            <h4>Accuracy: {stats.accuracy}%</h4>
-                            <p>You answered {stats.correct} out of {exam.questions.length} questions correctly.</p>
+                            <h4>Score: {stats.scorePercentage}% {stats.totalMaxMarks > 0 && <span style={{ fontSize: '0.8em', color: 'var(--color-text-secondary)' }}>({stats.totalObtainedMarks}/{stats.totalMaxMarks} Marks)</span>}</h4>
+                            <p>You answered {stats.correct} out of {exam.questions.length} questions correctly ({stats.accuracy}% accuracy).</p>
                         </div>
                     </div>
 

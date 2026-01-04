@@ -22,8 +22,31 @@ const ReviewExam = ({ getExamById, reviewExam, updateExam }) => {
         }
 
         setExam(examData);
-        setReviewedQuestions(examData.questions.map(q => ({ ...q })));
+        // Sort questions by number to ensure increasing order
+        const sortedQuestions = [...examData.questions].sort((a, b) => a.number - b.number);
+        setReviewedQuestions(sortedQuestions.map(q => ({ ...q })));
     }, [examId]);
+
+    const getMarkPerQuestion = (questionNumber) => {
+        if (!exam) return 4; // Default fallback
+
+        // Check if sections are used
+        if (exam.sections && exam.sections.length > 0) {
+            const section = exam.sections.find(s =>
+                questionNumber >= s.startQuestion && questionNumber <= s.endQuestion
+            );
+            if (section && section.marks && section.count) {
+                return section.marks / section.count;
+            }
+        }
+
+        // Check global marks
+        if (exam.totalMaxMarks && exam.questions.length > 0) {
+            return exam.totalMaxMarks / exam.questions.length;
+        }
+
+        return 4; // Default if no marks defined
+    };
 
     const handleStatusChange = (status) => {
         const updated = [...reviewedQuestions];
@@ -32,9 +55,9 @@ const ReviewExam = ({ getExamById, reviewExam, updateExam }) => {
 
         // Auto-assign default marks
         if (status === QuestionStatus.CORRECT) {
-            // Only overwrite if it was 0 or negative (from previous incorrect)
+            // Only overwrite if it was 0 or negative (from previous incorrect) or if currently undefined
             if (!currentQ.marks || currentQ.marks <= 0) {
-                currentQ.marks = 4;
+                currentQ.marks = getMarkPerQuestion(currentQ.number);
             }
         } else if (status === QuestionStatus.INCORRECT) {
             currentQ.marks = -Math.abs(negativeMark); // Ensure it's negative

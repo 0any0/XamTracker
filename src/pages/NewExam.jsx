@@ -21,10 +21,10 @@ const NewExam = ({ subjects, createExam }) => {
 
     // Sections State
     const [enableSections, setEnableSections] = useState(false);
-    const [sections, setSections] = useState([{ id: Date.now(), name: '', count: '' }]);
+    const [sections, setSections] = useState([{ id: Date.now(), name: '', count: '', marks: '' }]);
 
     const addSection = () => {
-        setSections([...sections, { id: Date.now(), name: '', count: '' }]);
+        setSections([...sections, { id: Date.now(), name: '', count: '', marks: '' }]);
     };
 
     const removeSection = (id) => {
@@ -59,6 +59,7 @@ const NewExam = ({ subjects, createExam }) => {
                     id: s.id,
                     name: s.name || 'Untitled Section',
                     count: count,
+                    marks: parseInt(s.marks) || 0,
                     startQuestion: currentStart,
                     endQuestion: currentStart + count - 1
                 };
@@ -144,15 +145,20 @@ const NewExam = ({ subjects, createExam }) => {
 
                     {enableSections ? (
                         <div className="sections-config" style={{ marginBottom: 'var(--space-xl)' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 30px', gap: 'var(--space-sm)', marginBottom: 'var(--space-xs)', padding: '0 var(--space-xs)' }}>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>Section Name</label>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>Questions</label>
+                                <label className="form-label" style={{ fontSize: '0.8rem' }}>Marks</label>
+                                <span></span>
+                            </div>
                             {sections.map((section, index) => (
-                                <div key={section.id} className="section-row" style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+                                <div key={section.id} className="section-row" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 30px', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
                                     <input
                                         type="text"
                                         className="form-input"
-                                        placeholder={`Section ${index + 1} Name`}
+                                        placeholder={`Section ${index + 1}`}
                                         value={section.name}
                                         onChange={(e) => updateSection(section.id, 'name', e.target.value)}
-                                        style={{ flex: 2 }}
                                     />
                                     <input
                                         type="number"
@@ -161,16 +167,30 @@ const NewExam = ({ subjects, createExam }) => {
                                         min="1"
                                         value={section.count}
                                         onChange={(e) => updateSection(section.id, 'count', e.target.value)}
-                                        style={{ flex: 1 }}
+                                    />
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Marks"
+                                        min="1"
+                                        value={section.marks || ''}
+                                        onChange={(e) => updateSection(section.id, 'marks', e.target.value)}
                                     />
                                     {sections.length > 1 && (
-                                        <Button
-                                            variant="ghost"
-                                            size="small"
+                                        <button
                                             onClick={() => removeSection(section.id)}
-                                            style={{ color: 'var(--color-error)' }}
-                                            icon={<span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>×</span>}
-                                        />
+                                            style={{
+                                                background: 'none',
+                                                border: 'none',
+                                                color: 'var(--color-error)',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>×</span>
+                                        </button>
                                     )}
                                 </div>
                             ))}
@@ -185,20 +205,37 @@ const NewExam = ({ subjects, createExam }) => {
                             </Button>
 
                             <div style={{ marginTop: 'var(--space-md)', textAlign: 'right', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-                                Total Questions: <strong>{sections.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0)}</strong>
+                                Total: <strong>{sections.reduce((sum, s) => sum + (parseInt(s.count) || 0), 0)} Qs</strong>
+                                <span style={{ margin: '0 8px' }}>|</span>
+                                <strong>{sections.reduce((sum, s) => sum + (parseInt(s.marks) || 0), 0)} Marks</strong>
                             </div>
                         </div>
                     ) : (
                         <div className="form-group">
-                            <label className="form-label">Total Questions (Optional)</label>
-                            <input
-                                type="number"
-                                className="form-input"
-                                placeholder="Unlimited"
-                                min="1"
-                                value={config.questionCount}
-                                onChange={(e) => setConfig({ ...config, questionCount: e.target.value })}
-                            />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
+                                <div>
+                                    <label className="form-label">Total Questions</label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Unlimited"
+                                        min="1"
+                                        value={config.questionCount}
+                                        onChange={(e) => setConfig({ ...config, questionCount: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="form-label">Total Marks</label>
+                                    <input
+                                        type="number"
+                                        className="form-input"
+                                        placeholder="Optional"
+                                        min="1"
+                                        value={config.totalMarks || ''}
+                                        onChange={(e) => setConfig({ ...config, totalMarks: e.target.value })}
+                                    />
+                                </div>
+                            </div>
                             <span className="note-hint" style={{ marginTop: '0.5rem', display: 'block' }}>
                                 Setting a limit allows specific target practice. Leave empty for open-ended sessions.
                             </span>

@@ -119,8 +119,10 @@ const SubjectView = ({ getSubjectById, getExamsBySubject, getAllNotesBySubject, 
 
                 <Card className="stat-card">
                     <div className="stat-content">
-                        <div className="stat-value">{stats.accuracy}%</div>
-                        <div className="stat-label">Accuracy</div>
+                        <div className="stat-value">{stats.scorePercentage}%</div>
+                        <div className="stat-label">
+                            Score {stats.totalMaxMarks > 0 ? <span style={{ fontSize: '0.8em', opacity: 0.8 }}>({stats.totalMarks}/{stats.totalMaxMarks})</span> : ''}
+                        </div>
                     </div>
                 </Card>
 
