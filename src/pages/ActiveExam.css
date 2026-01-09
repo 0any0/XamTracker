@@ -207,6 +207,8 @@ html[data-theme='dark'] .paused-overlay {
     max-height: 80vh;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    /* Enable global scrolling for sidebar */
 }
 
 .questions-sidebar h3 {
@@ -215,13 +217,15 @@ html[data-theme='dark'] .paused-overlay {
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    flex-shrink: 0;
+    /* Keep header visible/sized correctly */
 }
 
 .questions-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: var(--space-xs);
-    overflow-y: auto;
+    /* removed overflow-y: auto from here */
     padding-right: var(--space-xs);
 }
 
@@ -275,9 +279,12 @@ html[data-theme='dark'] .paused-overlay {
 
     .questions-sidebar {
         position: static;
-        order: 2; /* Put sidebar below card on tablets/mobile */
-        max-height: 300px; /* Limit height */
-        overflow-y: auto; /* Allow scrolling inside sidebar */
+        order: 2;
+        /* Put sidebar below card on tablets/mobile */
+        max-height: 300px;
+        /* Limit height */
+        overflow-y: auto;
+        /* Allow scrolling inside sidebar */
     }
 
     .questions-grid {
@@ -292,7 +299,7 @@ html[data-theme='dark'] .paused-overlay {
         gap: var(--space-md);
         padding: var(--space-md);
     }
-    
+
     .exam-header-actions {
         width: 100%;
         justify-content: space-between;
@@ -322,12 +329,121 @@ html[data-theme='dark'] .paused-overlay {
     .question-placeholder {
         padding: var(--space-lg);
     }
-    
+
     .exam-navigation {
         gap: var(--space-sm);
     }
-    
+
     .exam-navigation button {
         padding: var(--space-md);
     }
+}
+
+/* Finish Exam Summary Modal */
+.finish-summary-card {
+    background: var(--color-surface);
+    padding: var(--space-2xl);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.summary-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.stat-box {
+    background: var(--color-bg-secondary);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    text-align: center;
+    border: 1px solid transparent;
+}
+
+.stat-box-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.stat-box-label {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.stat-box.review-alert {
+    grid-column: span 2;
+    background: var(--color-warning-bg, #fff7ed);
+    /* Fallback for light */
+    border-color: var(--color-warning-border, #ffedd5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    text-align: left;
+}
+
+.review-alert-text {
+    font-weight: 700;
+    color: var(--color-warning-text, #9a3412);
+    /* Dark orange */
+}
+
+.review-alert-subtext {
+    font-size: 0.8rem;
+    color: var(--color-warning-text, #9a3412);
+    opacity: 0.8;
+}
+
+/* Dark Mode Overrides for Summary variables */
+html[data-theme='dark'] .stat-box.review-alert {
+    background: rgba(234, 179, 8, 0.15);
+    /* Low opacity yellow/orange */
+    border-color: rgba(234, 179, 8, 0.3);
+}
+
+html[data-theme='dark'] .review-alert-text,
+html[data-theme='dark'] .review-alert-subtext {
+    color: var(--color-warning);
+    /* Brighter yellow/orange for dark mode text */
+}
+
+/* Timer Capsule Styles */
+.timer-controls-capsule {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg-secondary);
+    height: 28px;
+    overflow: hidden;
+}
+
+.capsule-btn {
+    padding: 0 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    color: var(--color-text);
+    border: none;
+    transition: background-color var(--transition-fast);
+}
+
+.capsule-btn:first-child {
+    border-right: 1px solid var(--color-border);
+}
+
+.capsule-btn:hover {
+    background: var(--color-surface-hover);
 }

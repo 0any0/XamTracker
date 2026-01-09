@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Check, Pause, Play, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Pause, Play, Maximize, Plus, Minus, Flag } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Timer from '../components/Timer';
@@ -179,6 +179,35 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
         }
     };
 
+    const [showFinishSummary, setShowFinishSummary] = useState(false);
+
+    // ... existing pause logic ...
+
+    // Calculation helper for stats
+    const getExamSummary = () => {
+        if (!exam) return { total: 0, attempted: 0, reviewed: 0, skipped: 0 };
+
+        const total = exam.config?.questionCount ? parseInt(exam.config.questionCount) : exam.questions.length;
+        // Count questions that exist in the array as "visited/attempted" (since we create them on nav)
+        // Check if they have meaningful timeSpent or content? 
+        // For now, let's treat any created question as "Attempted" unless clearly empty.
+        // Actually, let's stick to the User's definitions:
+        // Attempted: Questions visited (which is essentially exam.questions.length)
+        // Not Attempted: Total - Visited (if config set)
+        // Marked for Review: status === 'review_later'
+
+        const visitedCount = exam.questions.length;
+        const reviewCount = exam.questions.filter(q => q.status === 'review_later').length;
+        const skippedCount = Math.max(0, total - visitedCount);
+
+        return {
+            total,
+            visited: visitedCount,
+            reviewed: reviewCount,
+            skipped: skippedCount
+        };
+    };
+
     const handleFinish = () => {
         if (isPaused) return;
         if (exam.questions.length === 0) {
@@ -186,11 +215,22 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
             return;
         }
 
-        if (confirm(`Finish exam with ${exam.questions.length} questions?`)) {
-            saveCurrentProgress();
-            completeExam(examId);
-            navigate(`/review/${examId}`);
-        }
+        // Pause the exam while showing the summary
+        saveCurrentProgress(); // Save current Q status
+        setIsPaused(true);     // Stop timers
+        pauseStartTime.current = Date.now();
+        setShowFinishSummary(true);
+    };
+
+    const confirmFinish = () => {
+        completeExam(examId);
+        navigate(`/review/${examId}`);
+    };
+
+    const cancelFinish = () => {
+        setShowFinishSummary(false);
+        // Resume exam
+        handleTogglePause(); // This will unpause and correctly adjust offsets
     };
 
     const getTimerStartTime = () => {
@@ -281,7 +321,7 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
 
             <div className="exam-container">
                 <Card glass className="exam-card">
-                    {isPaused && (
+                    {isPaused && !showFinishSummary && (
                         <div className="paused-overlay">
                             <div className="paused-content">
                                 <Pause size={48} className="paused-icon" />
@@ -295,6 +335,64 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                                 >
                                     Resume Exam
                                 </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {showFinishSummary && (
+                        <div className="paused-overlay">
+                            <div className="finish-summary-card">
+                                <div style={{ textAlign: 'center' }}>
+                                    <h2 style={{ fontSize: '1.5rem', marginBottom: 'var(--space-sm)' }}>Finish Exam?</h2>
+                                    <p style={{ color: 'var(--color-text-secondary)' }}>You are about to submit your exam.</p>
+                                </div>
+
+                                <div className="summary-stats-grid">
+                                    <div className="stat-box">
+                                        <div className="stat-box-value">
+                                            {getExamSummary().visited}
+                                        </div>
+                                        <div className="stat-box-label">Attempted</div>
+                                    </div>
+
+                                    <div className="stat-box">
+                                        <div className="stat-box-value" style={{ color: 'var(--color-text-tertiary)' }}>
+                                            {getExamSummary().skipped}
+                                        </div>
+                                        <div className="stat-box-label">Skipped</div>
+                                    </div>
+
+                                    <div className="stat-box review-alert">
+                                        <Flag size={20} className="review-alert-icon" color="var(--color-warning)" />
+                                        <div>
+                                            <div className="review-alert-text">
+                                                {getExamSummary().reviewed} Marked for Review
+                                            </div>
+                                            <div className="review-alert-subtext">
+                                                Double check these before finishing
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-sm)' }}>
+                                    <Button
+                                        variant="ghost"
+                                        size="large"
+                                        fullWidth
+                                        onClick={cancelFinish}
+                                    >
+                                        Resume
+                                    </Button>
+                                    <Button
+                                        variant="primary"
+                                        size="large"
+                                        fullWidth
+                                        onClick={confirmFinish}
+                                    >
+                                        Finish Exam
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -322,11 +420,91 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                                 <div className="question-timer-wrapper">
                                     <span className="timer-label">Question Time:</span>
                                     {/* Key prop ensures timer resets/re-inits when question changes */}
-                                    <Timer
-                                        key={currentQuestion.id}
-                                        startTime={getTimerStartTime()}
-                                        size="medium"
-                                    />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <Timer
+                                            key={currentQuestion.id}
+                                            startTime={getTimerStartTime()}
+                                            size="medium"
+                                        />
+                                        <div className="timer-controls-capsule" style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            border: '1px solid var(--color-border)',
+                                            borderRadius: '999px',
+                                            background: 'var(--color-bg-secondary)',
+                                            height: '28px',
+                                            overflow: 'hidden'
+                                        }}>
+                                            <button
+                                                className="capsule-btn"
+                                                onClick={() => {
+                                                    if (isPaused) return;
+                                                    const now = Date.now();
+                                                    const currentSessionTime = now - viewStartTime.current;
+                                                    const previousTime = currentQuestion.timeSpent || 0;
+
+                                                    // Logic: Current Total + Adjustment
+                                                    // We commit the current session time to the store, apply adjustment, and reset the view timer
+                                                    const newTotalTime = Math.max(0, previousTime + currentSessionTime - 30000); // Subtract 30s
+
+                                                    updateQuestionAtIndex(examId, currentQuestionIndex, {
+                                                        timeSpent: newTotalTime
+                                                    });
+
+                                                    viewStartTime.current = now;
+                                                }}
+                                                title="Subtract 30s"
+                                                style={{
+                                                    borderRight: '1px solid var(--color-border)',
+                                                    padding: '0 10px',
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    background: 'transparent',
+                                                    color: 'var(--color-text-primary)'
+                                                }}
+                                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
+                                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                <Minus size={14} strokeWidth={2.5} />
+                                            </button>
+
+                                            <button
+                                                className="capsule-btn"
+                                                onClick={() => {
+                                                    if (isPaused) return;
+                                                    const now = Date.now();
+                                                    const currentSessionTime = now - viewStartTime.current;
+                                                    const previousTime = currentQuestion.timeSpent || 0;
+
+                                                    const newTotalTime = previousTime + currentSessionTime + 30000; // Add 30s
+
+                                                    updateQuestionAtIndex(examId, currentQuestionIndex, {
+                                                        timeSpent: newTotalTime
+                                                    });
+
+                                                    viewStartTime.current = now;
+                                                }}
+                                                title="Add 30s"
+                                                style={{
+                                                    padding: '0 10px',
+                                                    height: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    background: 'transparent',
+                                                    color: 'var(--color-text-primary)'
+                                                }}
+                                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
+                                                onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                                            >
+                                                <Plus size={14} strokeWidth={2.5} />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -409,24 +587,68 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
 
                 {/* Question List Sidebar */}
                 <Card className="questions-sidebar">
-                    <h3>Questions</h3>
-                    <div className="questions-grid">
-                        {Array.from({ length: totalSlots }, (_, i) => i + 1).map((num) => {
-                            const qData = exam.questions.find(q => q.number === num);
-                            const isActive = currentQuestion?.number === num;
-                            const statusClass = qData ? (qData.status !== 'unattempted' ? qData.status : 'visited') : 'unvisited';
+                    <h3 style={{ position: 'sticky', top: 0, background: 'var(--color-surface)', zIndex: 1, paddingBottom: 'var(--space-sm)' }}>Questions</h3>
 
-                            return (
-                                <button
-                                    key={num}
-                                    className={`question-grid-item ${isActive ? 'active' : ''} ${statusClass}`}
-                                    onClick={() => navigateToNumber(num)}
-                                >
-                                    {num}
-                                </button>
-                            );
-                        })}
-                    </div>
+                    {exam.sections && exam.sections.length > 0 ? (
+                        <div className="sections-container" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+                            {exam.sections.map((section, idx) => {
+                                // Calculate range for this section
+                                const start = parseInt(section.startQuestion);
+                                const end = parseInt(section.endQuestion);
+                                const length = end - start + 1;
+
+                                return (
+                                    <div key={section.id || idx} className="section-group">
+                                        <div style={{
+                                            fontSize: '0.8rem',
+                                            fontWeight: 700,
+                                            color: 'var(--color-text-tertiary)',
+                                            marginBottom: 'var(--space-xs)',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.05em'
+                                        }}>
+                                            {section.name} <span style={{ opacity: 0.6, fontWeight: 400 }}>({start}-{end})</span>
+                                        </div>
+                                        <div className="questions-grid">
+                                            {Array.from({ length }, (_, i) => start + i).map((num) => {
+                                                const qData = exam.questions.find(q => q.number === num);
+                                                const isActive = currentQuestion?.number === num;
+                                                const statusClass = qData ? (qData.status !== 'unattempted' ? qData.status : 'visited') : 'unvisited';
+
+                                                return (
+                                                    <button
+                                                        key={num}
+                                                        className={`question-grid-item ${isActive ? 'active' : ''} ${statusClass}`}
+                                                        onClick={() => navigateToNumber(num)}
+                                                    >
+                                                        {num}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="questions-grid">
+                            {Array.from({ length: totalSlots }, (_, i) => i + 1).map((num) => {
+                                const qData = exam.questions.find(q => q.number === num);
+                                const isActive = currentQuestion?.number === num;
+                                const statusClass = qData ? (qData.status !== 'unattempted' ? qData.status : 'visited') : 'unvisited';
+
+                                return (
+                                    <button
+                                        key={num}
+                                        className={`question-grid-item ${isActive ? 'active' : ''} ${statusClass}`}
+                                        onClick={() => navigateToNumber(num)}
+                                    >
+                                        {num}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </Card>
             </div>
         </div>
