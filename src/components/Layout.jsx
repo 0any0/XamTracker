@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BarChart3, Settings, Moon, Sun } from 'lucide-react';
+import logo from '../assets/logo.png';
 import './Layout.css';
 
 const Layout = ({ children, theme, toggleTheme }) => {
@@ -14,7 +15,7 @@ const Layout = ({ children, theme, toggleTheme }) => {
                 <div className="container">
                     <div className="header-content">
                         <Link to="/" className="logo">
-                            <span className="logo-icon">📊</span>
+                            <img src={logo} alt="Logo" className="logo-image" />
                             <span className="logo-text">ExamTracker</span>
                         </Link>
 

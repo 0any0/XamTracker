@@ -13,12 +13,52 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
     const viewStartTime = useRef(Date.now());
     const [pendingNavigation, setPendingNavigation] = useState(null); // { type: 'number', value: 5 }
 
-    // Pause State
-    const [isPaused, setIsPaused] = useState(false);
-    const pauseStartTime = useRef(null);
+    // Pause State derived from exam data
+    const isPaused = !!exam?.pauseStartTime;
 
-    // Get exam data directly from props (reactive)
-    const exam = getExamById(examId);
+    const saveCurrentProgress = () => {
+        // If passed exam isPaused, we shouldn't save time unless we are in the process of pausing
+        // BUT logic: saveCurrentProgress is called just BEFORE setting paused=true.
+        // So at that moment, isPaused (derived) is false. Correct.
+
+        if (exam?.pauseStartTime) return;
+
+        const timeSpentSession = Date.now() - viewStartTime.current;
+        const currentQ = exam.questions[currentQuestionIndex];
+
+        if (currentQ) {
+            const totalTimeSpent = (currentQ.timeSpent || 0) + timeSpentSession;
+            updateQuestionAtIndex(examId, currentQuestionIndex, {
+                timeSpent: totalTimeSpent
+            });
+            // Reset local tracker so subsequent calls don't double count
+            viewStartTime.current = Date.now();
+        }
+    };
+
+    const handleTogglePause = () => {
+        if (!exam.pauseStartTime) {
+            // Pausing
+            saveCurrentProgress(); // Save collected time so far
+            updateExam(examId, { pauseStartTime: new Date().toISOString() });
+        } else {
+            // Resuming
+            const now = Date.now();
+            const pauseStartMs = new Date(exam.pauseStartTime).getTime();
+            const pauseDuration = now - pauseStartMs;
+
+            // Shift exam start time forward
+            let updates = { pauseStartTime: null };
+            if (exam.startTime) {
+                const oldStartMs = new Date(exam.startTime).getTime();
+                const newStartMs = oldStartMs + pauseDuration;
+                updates.startTime = new Date(newStartMs).toISOString();
+            }
+            updateExam(examId, updates);
+
+            // viewStartTime.current will be reset by the useEffect reacting to pauseStartTime prop change
+        }
+    };
 
     // Initialize first question if needed
     useEffect(() => {
@@ -42,21 +82,20 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
         }
     }, [exam, pendingNavigation]);
 
-    // Reset view timer when question changes
+    // Reset view timer when question changes or when un-paused
+    // If we just resumed (exam.pauseStartTime became null), we need to reset viewStartTime
     useEffect(() => {
-        if (!isPaused) {
+        if (exam && !exam.pauseStartTime) {
             viewStartTime.current = Date.now();
         }
-    }, [currentQuestionIndex, isPaused]);
+    }, [currentQuestionIndex, exam?.pauseStartTime]); // Depend on pause status change
 
     // Keyboard Shortcuts
     useEffect(() => {
         const handleKeyDown = (e) => {
-            // Avoid triggering shortcuts if user is typing in an input
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-            if (isPaused) {
-                // Only allow Resume (Space)
+            if (exam?.pauseStartTime) {
                 if (e.code === 'Space') {
                     e.preventDefault();
                     handleTogglePause();
@@ -71,7 +110,7 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                     break;
                 case 'ArrowLeft':
                     e.preventDefault();
-                    if (currentQuestionIndex > 0) handlePrevious(); // Only if not at start
+                    if (currentQuestionIndex > 0) handlePrevious();
                     break;
                 case 'Space':
                     e.preventDefault();
@@ -89,11 +128,7 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isPaused, currentQuestionIndex, exam, examId, updateQuestionAtIndex]);
-    // Dependencies: handleNext/Prev invoke navigation. 
-    // We should make sure we have access to latest state or use refs if these funcs are unstable.
-    // Since handleNext/Prev are defined in component scope, they rely on 'exam' and 'currentQuestionIndex'.
-    // Including them in dependency array is safer.
+    }, [exam, currentQuestionIndex, examId, updateQuestionAtIndex]);
 
 
     if (!exam) {
@@ -102,45 +137,8 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
 
     const currentQuestion = exam.questions[currentQuestionIndex];
 
-    const saveCurrentProgress = () => {
-        if (isPaused) return; // Don't save if already paused (shouldn't happen)
-
-        const timeSpentSession = Date.now() - viewStartTime.current;
-        const currentQ = exam.questions[currentQuestionIndex];
-
-        if (currentQ) {
-            const totalTimeSpent = (currentQ.timeSpent || 0) + timeSpentSession;
-            updateQuestionAtIndex(examId, currentQuestionIndex, {
-                timeSpent: totalTimeSpent
-            });
-        }
-    };
-
-    const handleTogglePause = () => {
-        if (!isPaused) {
-            // Pausing
-            saveCurrentProgress();
-            pauseStartTime.current = Date.now();
-            setIsPaused(true);
-        } else {
-            // Resuming
-            const now = Date.now();
-            const pauseDuration = now - (pauseStartTime.current || now);
-
-            // Shift exam start time forward by the duration of the pause
-            // so that "Now - StartTime" continues to be correct total elapsed active time
-            if (exam.startTime) {
-                const oldStartMs = new Date(exam.startTime).getTime();
-                const newStartMs = oldStartMs + pauseDuration;
-                updateExam(examId, { startTime: new Date(newStartMs).toISOString() });
-            }
-
-            // Reset question view timer
-            viewStartTime.current = now;
-            setIsPaused(false);
-            pauseStartTime.current = null;
-        }
-    };
+    // Helper for rendering - already defined above
+    // const isPaused = !!exam.pauseStartTime;
 
     const navigateToNumber = (targetNumber) => {
         if (isPaused) return;
@@ -188,14 +186,6 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
         if (!exam) return { total: 0, attempted: 0, reviewed: 0, skipped: 0 };
 
         const total = exam.config?.questionCount ? parseInt(exam.config.questionCount) : exam.questions.length;
-        // Count questions that exist in the array as "visited/attempted" (since we create them on nav)
-        // Check if they have meaningful timeSpent or content? 
-        // For now, let's treat any created question as "Attempted" unless clearly empty.
-        // Actually, let's stick to the User's definitions:
-        // Attempted: Questions visited (which is essentially exam.questions.length)
-        // Not Attempted: Total - Visited (if config set)
-        // Marked for Review: status === 'review_later'
-
         const visitedCount = exam.questions.length;
         const reviewCount = exam.questions.filter(q => q.status === 'review_later').length;
         const skippedCount = Math.max(0, total - visitedCount);
@@ -209,16 +199,21 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
     };
 
     const handleFinish = () => {
-        if (isPaused) return;
+        if (isPaused && !showFinishSummary) {
+            setShowFinishSummary(true);
+            return;
+        }
+
         if (exam.questions.length === 0) {
             alert('Please attempt at least one question');
             return;
         }
 
-        // Pause the exam while showing the summary
-        saveCurrentProgress(); // Save current Q status
-        setIsPaused(true);     // Stop timers
-        pauseStartTime.current = Date.now();
+        // Pause the exam while showing the summary if not already paused
+        if (!isPaused) {
+            saveCurrentProgress(); // Save current Q status
+            updateExam(examId, { pauseStartTime: new Date().toISOString() });
+        }
         setShowFinishSummary(true);
     };
 
@@ -429,11 +424,12 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                                         <div className="timer-controls-capsule" style={{
                                             display: 'flex',
                                             alignItems: 'center',
-                                            border: '1px solid var(--color-border)',
+                                            border: '2px solid var(--color-primary)',
                                             borderRadius: '999px',
-                                            background: 'var(--color-bg-secondary)',
-                                            height: '28px',
-                                            overflow: 'hidden'
+                                            background: 'var(--color-surface)',
+                                            height: '32px',
+                                            overflow: 'hidden',
+                                            boxShadow: 'var(--shadow-sm)'
                                         }}>
                                             <button
                                                 className="capsule-btn"
@@ -444,31 +440,47 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                                                     const previousTime = currentQuestion.timeSpent || 0;
 
                                                     // Logic: Current Total + Adjustment
-                                                    // We commit the current session time to the store, apply adjustment, and reset the view timer
-                                                    const newTotalTime = Math.max(0, previousTime + currentSessionTime - 30000); // Subtract 30s
+                                                    const intendedNewTime = previousTime + currentSessionTime - 30000;
+                                                    const newTotalTime = Math.max(0, intendedNewTime);
+
+                                                    // Calculate actual delta to change universal timer
+                                                    // If we hit 0 (clamped), delta will be less than 30s (magnitude)
+                                                    const delta = newTotalTime - (previousTime + currentSessionTime);
 
                                                     updateQuestionAtIndex(examId, currentQuestionIndex, {
                                                         timeSpent: newTotalTime
                                                     });
 
+                                                    // Sync Universal Timer: Shift start time opposite to delta
+                                                    // If delta is negative (time removed), StartTime must increase (move later)
+                                                    if (delta !== 0) {
+                                                        const oldStartMs = new Date(exam.startTime).getTime();
+                                                        updateExam(examId, { startTime: new Date(oldStartMs - delta).toISOString() });
+                                                    }
+
                                                     viewStartTime.current = now;
                                                 }}
                                                 title="Subtract 30s"
                                                 style={{
-                                                    borderRight: '1px solid var(--color-border)',
-                                                    padding: '0 10px',
+                                                    borderRight: '1px solid var(--color-primary)',
+                                                    padding: '0 12px',
                                                     height: '100%',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     cursor: 'pointer',
                                                     background: 'transparent',
-                                                    color: 'var(--color-text-primary)'
+                                                    color: 'var(--color-primary)',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 600,
+                                                    fontFamily: "'SF Mono', 'Monaco', 'Courier New', monospace",
+                                                    fontVariantNumeric: 'tabular-nums',
+                                                    letterSpacing: '-0.5px'
                                                 }}
-                                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
+                                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-primary-light)'}
                                                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                             >
-                                                <Minus size={14} strokeWidth={2.5} />
+                                                -30s
                                             </button>
 
                                             <button
@@ -478,30 +490,40 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                                                     const now = Date.now();
                                                     const currentSessionTime = now - viewStartTime.current;
                                                     const previousTime = currentQuestion.timeSpent || 0;
+                                                    const delta = 30000;
 
-                                                    const newTotalTime = previousTime + currentSessionTime + 30000; // Add 30s
+                                                    const newTotalTime = previousTime + currentSessionTime + delta; // Add 30s
 
                                                     updateQuestionAtIndex(examId, currentQuestionIndex, {
                                                         timeSpent: newTotalTime
                                                     });
 
+                                                    // Sync Universal Timer: Shift start time earlier to add time
+                                                    const oldStartMs = new Date(exam.startTime).getTime();
+                                                    updateExam(examId, { startTime: new Date(oldStartMs - delta).toISOString() });
+
                                                     viewStartTime.current = now;
                                                 }}
                                                 title="Add 30s"
                                                 style={{
-                                                    padding: '0 10px',
+                                                    padding: '0 12px',
                                                     height: '100%',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
                                                     cursor: 'pointer',
                                                     background: 'transparent',
-                                                    color: 'var(--color-text-primary)'
+                                                    color: 'var(--color-primary)',
+                                                    fontSize: '0.85rem',
+                                                    fontWeight: 600,
+                                                    fontFamily: "'SF Mono', 'Monaco', 'Courier New', monospace",
+                                                    fontVariantNumeric: 'tabular-nums',
+                                                    letterSpacing: '-0.5px'
                                                 }}
-                                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-surface)'}
+                                                onMouseOver={(e) => e.currentTarget.style.background = 'var(--color-primary-light)'}
                                                 onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                                             >
-                                                <Plus size={14} strokeWidth={2.5} />
+                                                +30s
                                             </button>
                                         </div>
                                     </div>
