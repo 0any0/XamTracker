@@ -6,11 +6,12 @@ const Timer = ({ startTime, paused = false, size = 'large' }) => {
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
+        const update = () => setElapsed(Date.now() - startTime);
+        update(); // Initial update on mount or prop change
+
         if (paused) return;
 
-        const interval = setInterval(() => {
-            setElapsed(Date.now() - startTime);
-        }, 100); // Update every 100ms for smooth display
+        const interval = setInterval(update, 100); // Update every 100ms for smooth display
 
         return () => clearInterval(interval);
     }, [startTime, paused]);

@@ -257,6 +257,16 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
         s => currentQuestion?.number >= s.startQuestion && currentQuestion?.number <= s.endQuestion
     );
 
+    // Calculate synchronized timer start
+    const totalRecordedTime = exam.questions.reduce((acc, q) => acc + (q.timeSpent || 0), 0);
+    // If running: Current Total = Recorded + (Now - ViewStart). We want (Now - Start) = Total.
+    // => Start = Now - (Recorded + Now - ViewStart) = ViewStart - Recorded.
+    // If paused: Current Total = Recorded.
+    // => Start = Now - Recorded.
+    const mainTimerStartTime = isPaused
+        ? Date.now() - totalRecordedTime
+        : viewStartTime.current - totalRecordedTime;
+
     return (
         <div className="active-exam-page">
             <div className="exam-header-bar">
@@ -307,7 +317,7 @@ const ActiveExam = ({ getExamById, addQuestion, updateQuestionAtIndex, updateExa
                         {isPaused ? "Resume" : "Pause"}
                     </Button>
                     <Timer
-                        startTime={new Date(exam.startTime).getTime()}
+                        startTime={mainTimerStartTime}
                         size="medium"
                         paused={isPaused}
                     />
